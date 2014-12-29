@@ -5,7 +5,8 @@
     <string name="vibrate">Vibrate</string>
     <string name="sensitivity">Sensitivity</string>
     <string name="frequency">Frequency</string>
-    <string name="sound">Sound</string>
+    <string name="primary_sound">Primary Sound</string>
+    <string name="secondary_sound">Secondary Sound</string>
 
     <string name="sensitivity_desc">How easily a sound is triggered</string>
     <string name="frequency_desc">How often a sound can be triggered</string>

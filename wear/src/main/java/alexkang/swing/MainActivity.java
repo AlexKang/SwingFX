@@ -11,6 +11,7 @@ import android.os.CountDownTimer;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.wearable.view.WatchViewStub;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,7 +28,8 @@ import java.util.List;
 
 public class MainActivity extends Activity implements SensorEventListener, MessageApi.MessageListener {
 
-    private static final String FIRE_SOUND = "x";
+    private static final String LIGHT_SOUND = "x";
+    private static final String HEAVY_SOUND = "y";
     private static final String UPDATE_VIBRATE = "vibrate/";
     private static final String UPDATE_SENSITIVITY = "sensitivity/";
     private static final String UPDATE_FREQUENCY = "frequency/";
@@ -46,6 +48,8 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
     private int delay;
     private boolean wait = false;
 
+    private boolean isHeavy = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +63,13 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
             public void onLayoutInflated(WatchViewStub watchViewStub) {
                 title = (TextView) stub.findViewById(R.id.title);
                 title.setTextSize(24);
+
+                stub.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        switchMode();
+                    }
+                });
             }
         });
 
@@ -109,7 +120,11 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
                 public void onFinish() {
                     wait = false;
 
-                    stub.setBackgroundColor(getResources().getColor(android.R.color.black));
+                    if (isHeavy) {
+                        stub.setBackgroundColor(getResources().getColor(android.R.color.white));
+                    } else {
+                        stub.setBackgroundColor(getResources().getColor(android.R.color.black));
+                    }
                     title.setTextSize(24);
                 }
             }.start();
@@ -118,8 +133,14 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
                 vibrator.vibrate(150);
             }
 
-            for (Node node : nodes) {
-                Wearable.MessageApi.sendMessage(googleApiClient, node.getId(), FIRE_SOUND, null);
+            if (isHeavy) {
+                for (Node node : nodes) {
+                    Wearable.MessageApi.sendMessage(googleApiClient, node.getId(), HEAVY_SOUND, null);
+                }
+            } else {
+                for (Node node : nodes) {
+                    Wearable.MessageApi.sendMessage(googleApiClient, node.getId(), LIGHT_SOUND, null);
+                }
             }
         }
     }
@@ -177,6 +198,18 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
                 .build();
 
         googleApiClient.connect();
+    }
+
+    private void switchMode() {
+        isHeavy = !isHeavy;
+
+        if (isHeavy) {
+            stub.setBackgroundColor(getResources().getColor(android.R.color.white));
+            title.setTextColor(getResources().getColor(android.R.color.black));
+        } else {
+            stub.setBackgroundColor(getResources().getColor(android.R.color.black));
+            title.setTextColor(getResources().getColor(android.R.color.white));
+        }
     }
 
 }

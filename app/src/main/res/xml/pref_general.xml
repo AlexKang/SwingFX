@@ -16,10 +16,17 @@
         android:summary="@string/frequency_desc" />
 
     <ListPreference
-        android:key="sound"
-        android:title="@string/sound"
+        android:key="primary_sound"
+        android:title="@string/primary_sound"
         android:entries="@array/sounds"
         android:entryValues="@array/sounds_values"
         android:defaultValue="whoosh" />
+
+    <ListPreference
+        android:key="secondary_sound"
+        android:title="@string/secondary_sound"
+        android:entries="@array/sounds"
+        android:entryValues="@array/sounds_values"
+        android:defaultValue="explosion" />
 
 </PreferenceScreen>

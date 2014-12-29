@@ -36,7 +36,8 @@ public class MainFragment extends PreferenceFragment {
     private CheckBoxPreference vibratePref;
     private Preference sensitivityPref;
     private Preference frequencyPref;
-    private ListPreference soundPref;
+    private ListPreference primarySoundPref;
+    private ListPreference secondarySoundPref;
     private SharedPreferences sharedPrefs;
 
     private LayoutInflater inflater;
@@ -50,7 +51,8 @@ public class MainFragment extends PreferenceFragment {
 
     private float sensitivity;
     private int frequency;
-    private String sound;
+    private String primarySound;
+    private String secondarySound;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,7 +64,8 @@ public class MainFragment extends PreferenceFragment {
         vibratePref = (CheckBoxPreference) findPreference("vibrate");
         sensitivityPref = findPreference("sensitivity");
         frequencyPref = findPreference("frequency");
-        soundPref = (ListPreference) findPreference("sound");
+        primarySoundPref = (ListPreference) findPreference("primary_sound");
+        secondarySoundPref = (ListPreference) findPreference("secondary_sound");
 
         inflater = getActivity().getLayoutInflater();
 
@@ -106,7 +109,7 @@ public class MainFragment extends PreferenceFragment {
      * Translates a ListPreference value to its corresponding human-readable key.
      */
     private CharSequence valueToKey(String value) {
-        return soundPref.getEntries()[soundPref.findIndexOfValue(value)];
+        return primarySoundPref.getEntries()[primarySoundPref.findIndexOfValue(value)];
     }
 
     private AlertDialog.Builder createDialog(String title, View view,
@@ -134,11 +137,14 @@ public class MainFragment extends PreferenceFragment {
         boolean vibrate = sharedPrefs.getBoolean("vibrate", true);
         sensitivity = sharedPrefs.getFloat("sensitivity", (float) 25);
         frequency = sharedPrefs.getInt("frequency", 150);
-        sound = sharedPrefs.getString("sound", "whoosh");
+        primarySound = sharedPrefs.getString("primary_sound", "whoosh");
+        secondarySound = sharedPrefs.getString("secondary_sound", "explosion");
 
         vibratePref.setChecked(vibrate);
-        soundPref.setValue(sound);
-        soundPref.setSummary(valueToKey(sound));
+        primarySoundPref.setValue(primarySound);
+        primarySoundPref.setSummary(valueToKey(primarySound));
+        secondarySoundPref.setValue(secondarySound);
+        secondarySoundPref.setSummary(valueToKey(secondarySound));
     }
 
     private boolean onSensitivityClick() {
@@ -235,6 +241,32 @@ public class MainFragment extends PreferenceFragment {
         return true;
     }
 
+    private boolean updateSoundPref(ListPreference pref, String value, boolean isPrimary) {
+        MainActivity activity = (MainActivity) getActivity();
+
+        // Unload the current sound to prevent high memory usage.
+        if (isPrimary) {
+            primarySound = value;
+            activity.soundPool.unload(activity.soundIdPrimary);
+        } else {
+            secondarySound = value;
+            activity.soundPool.unload(activity.soundIdSecondary);
+        }
+
+        int newSoundId = activity.soundPool.load(activity, activity.getSound(value), 1);
+        pref.setSummary(valueToKey(value));
+
+        if (isPrimary) {
+            sharedPrefs.edit().putString("primary_sound", value).apply();
+            activity.soundIdPrimary = newSoundId;
+        } else {
+            sharedPrefs.edit().putString("secondary_sound", value).apply();
+            activity.soundIdSecondary = newSoundId;
+        }
+
+        return true;
+    }
+
     private void setupPreferenceListeners() {
         vibratePref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
@@ -259,22 +291,17 @@ public class MainFragment extends PreferenceFragment {
             }
         });
 
-        soundPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+        primarySoundPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                String value = (String) newValue;
-                sound = value;
-                MainActivity activity = (MainActivity) getActivity();
+                return updateSoundPref(primarySoundPref, (String) newValue, true);
+            }
+        });
 
-                // Unload the current sound to prevent high memory usage.
-                activity.soundPool.unload(activity.soundId);
-                int newSoundId = activity.soundPool.load(activity, activity.getSound(sound), 1);
-
-                soundPref.setSummary(valueToKey(value));
-                sharedPrefs.edit().putString("sound", value).apply();
-                activity.soundId = newSoundId;
-
-                return true;
+        secondarySoundPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                return updateSoundPref(secondarySoundPref, (String) newValue, false);
             }
         });
     }

@@ -21,10 +21,12 @@ import com.google.android.gms.wearable.Wearable;
 public class MainActivity extends ActionBarActivity implements MessageApi.MessageListener {
 
     private static final int REQUEST_CODE_PLAY_SERVICES = 1001;
+    private static final String HEAVY_SOUND = "y";
 
     protected GoogleApiClient googleApiClient;
     protected SoundPool soundPool;
-    protected int soundId;
+    protected int soundIdPrimary;
+    protected int soundIdSecondary;
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -45,9 +47,11 @@ public class MainActivity extends ActionBarActivity implements MessageApi.Messag
 
         // We use the deprecated SoundPool constructor because the new method of doing so is not
         // available on 4.4 and lower.
-        String currSound = sharedPrefs.getString("sound", "whoosh");
+        String primarySound = sharedPrefs.getString("primary_sound", "whoosh");
+        String secondarySound = sharedPrefs.getString("secondary_sound", "explosion");
         soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
-        soundId = soundPool.load(this, getSound(currSound), 1);
+        soundIdPrimary = soundPool.load(this, getSound(primarySound), 1);
+        soundIdSecondary = soundPool.load(this, getSound(secondarySound), 1);
     }
 
     @Override
@@ -73,7 +77,11 @@ public class MainActivity extends ActionBarActivity implements MessageApi.Messag
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
-        soundPool.play(soundId, 1, 1, 0, 0, 1);
+        if (messageEvent.getPath().equals(HEAVY_SOUND)) {
+            soundPool.play(soundIdSecondary, 1, 1, 0, 0, 1);
+        } else {
+            soundPool.play(soundIdPrimary, 1, 1, 0, 0, 1);
+        }
     }
 
     protected int getSound(String name) {
