@@ -58,6 +58,7 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
             @Override
             public void onLayoutInflated(WatchViewStub watchViewStub) {
                 title = (TextView) stub.findViewById(R.id.title);
+                title.setTextSize(24);
             }
         });
 
@@ -98,7 +99,7 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
             wait = true;
 
             stub.setBackgroundColor(getResources().getColor(R.color.yellow));
-            title.setTextSize(32);
+            title.setTextSize(36);
 
             new CountDownTimer(delay, delay) {
                 @Override
