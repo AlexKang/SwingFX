@@ -2,23 +2,21 @@
 <resources>
 
     <string-array name="sounds">
-        <item>420</item>
         <item>Explosion</item>
-        <item>Fart</item>
         <item>Gun</item>
         <item>Laser Gun</item>
         <item>Light Saber</item>
+        <item>Punch</item>
         <item>Sword</item>
         <item>Whoosh</item>
     </string-array>
 
     <string-array name="sounds_values">
-        <item>weed</item>
         <item>explosion</item>
-        <item>fart</item>
         <item>gun</item>
         <item>laser_gun</item>
         <item>light_saber</item>
+        <item>punch</item>
         <item>sword</item>
         <item>whoosh</item>
     </string-array>
