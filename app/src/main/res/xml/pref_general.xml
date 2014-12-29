@@ -1,0 +1,25 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:key="vibrate"
+        android:title="@string/vibrate"
+        android:defaultValue="true" />
+
+    <Preference
+        android:key="sensitivity"
+        android:title="@string/sensitivity"
+        android:summary="@string/sensitivity_desc" />
+
+    <Preference
+        android:key="frequency"
+        android:title="@string/frequency"
+        android:summary="@string/frequency_desc" />
+
+    <ListPreference
+        android:key="sound"
+        android:title="@string/sound"
+        android:entries="@array/sounds"
+        android:entryValues="@array/sounds_values"
+        android:defaultValue="whoosh" />
+
+</PreferenceScreen>
