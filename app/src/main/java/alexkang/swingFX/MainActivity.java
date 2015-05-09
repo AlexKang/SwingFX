@@ -1,4 +1,4 @@
-package alexkang.swing;
+package alexkang.swingFX;
 
 import android.content.Intent;
 import android.content.SharedPreferences;

@@ -6,7 +6,7 @@ android {
     buildToolsVersion "21.1.2"
 
     defaultConfig {
-        applicationId "alexkang.swing"
+        applicationId "alexkang.swingFX"
         minSdkVersion 21
         targetSdkVersion 22
         versionCode 1

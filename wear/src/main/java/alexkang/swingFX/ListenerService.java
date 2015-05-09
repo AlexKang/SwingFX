@@ -1,4 +1,4 @@
-package alexkang.swing;
+package alexkang.swingFX;
 
 import android.content.Intent;
 
@@ -12,11 +12,9 @@ public class ListenerService extends WearableListenerService {
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         if (messageEvent.getPath().equals(START_APP)) {
-            if (!MainActivity.isRunning) {
-                Intent intent = new Intent(this, MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-            }
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         } else {
             super.onMessageReceived(messageEvent);
         }

@@ -1,6 +1,6 @@
 <preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <header android:fragment="alexkang.swing.MainFragment"
+    <header android:fragment="alexkang.swingFX.MainFragment"
         android:title="@string/general" />
 
 </preference-headers>

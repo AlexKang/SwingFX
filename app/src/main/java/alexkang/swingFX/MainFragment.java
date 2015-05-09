@@ -1,4 +1,4 @@
-package alexkang.swing;
+package alexkang.swingFX;
 
 
 import android.app.AlertDialog;
