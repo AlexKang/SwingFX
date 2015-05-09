@@ -2,6 +2,7 @@
 <resources>
 
     <string-array name="sounds">
+        <item>Doo</item>
         <item>Explosion</item>
         <item>Gun</item>
         <item>Laser Gun</item>
@@ -12,6 +13,7 @@
     </string-array>
 
     <string-array name="sounds_values">
+        <item>doo</item>
         <item>explosion</item>
         <item>gun</item>
         <item>laser_gun</item>

@@ -32,6 +32,8 @@ public class MainFragment extends PreferenceFragment {
     private static final String UPDATE_VIBRATE = "vibrate/";
     private static final String UPDATE_SENSITIVITY = "sensitivity/";
     private static final String UPDATE_FREQUENCY = "frequency/";
+    private static final String START_APP = "/start_app";
+    private static final String STOP_APP = "stop_app";
 
     private CheckBoxPreference vibratePref;
     private Preference sensitivityPref;
@@ -87,6 +89,15 @@ public class MainFragment extends PreferenceFragment {
                         nodes = getConnectedNodesResult.getNodes();
                     }
                 });
+
+        sendIntent(START_APP);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        sendMessage(STOP_APP);
     }
 
     /*
@@ -133,6 +144,21 @@ public class MainFragment extends PreferenceFragment {
         }
     }
 
+    private void sendIntent(final String message) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                NodeApi.GetConnectedNodesResult nodes =
+                        Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
+
+                for (Node node : nodes.getNodes()) {
+                    Wearable.MessageApi.sendMessage(
+                            googleApiClient, node.getId(), message, null).await();
+                }
+            }
+        }).start();
+    }
+
     private void retrieveDefaultPreferences() {
         boolean vibrate = sharedPrefs.getBoolean("vibrate", true);
         sensitivity = sharedPrefs.getFloat("sensitivity", (float) 25);
@@ -158,10 +184,12 @@ public class MainFragment extends PreferenceFragment {
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
 
         int sensitivityPercent = sensitivityToPercent(sensitivity);

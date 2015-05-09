@@ -33,6 +33,8 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
     private static final String UPDATE_VIBRATE = "vibrate/";
     private static final String UPDATE_SENSITIVITY = "sensitivity/";
     private static final String UPDATE_FREQUENCY = "frequency/";
+    private static final String START_APP = "/start_app";
+    private static final String STOP_APP = "stop_app";
 
     private WatchViewStub stub;
     private TextView title;
@@ -93,9 +95,21 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onResume() {
+        super.onResume();
+
+        sManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST);
+        Wearable.MessageApi.addListener(googleApiClient, this);
+
+        sendIntent(START_APP);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
         sManager.unregisterListener(this);
+        sendMessage(STOP_APP);
     }
 
     @Override
@@ -130,17 +144,13 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
             }.start();
 
             if (vibrate) {
-                vibrator.vibrate(150);
+                vibrator.vibrate(125);
             }
 
             if (isHeavy) {
-                for (Node node : nodes) {
-                    Wearable.MessageApi.sendMessage(googleApiClient, node.getId(), HEAVY_SOUND, null);
-                }
+                sendMessage(HEAVY_SOUND);
             } else {
-                for (Node node : nodes) {
-                    Wearable.MessageApi.sendMessage(googleApiClient, node.getId(), LIGHT_SOUND, null);
-                }
+                sendMessage(LIGHT_SOUND);
             }
         }
     }
@@ -149,16 +159,14 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
     public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
     @Override
-    public void onResume() {
-        super.onResume();
-
-        sManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST);
-        Wearable.MessageApi.addListener(googleApiClient, this);
-    }
-
-    @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         String message = messageEvent.getPath();
+
+        if (message.equals(STOP_APP)) {
+            finish();
+            return;
+        }
+
         String value = message.split("/")[1];
 
         if (message.contains(UPDATE_VIBRATE)) {
@@ -186,7 +194,8 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
                 })
                 .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
                     @Override
-                    public void onConnected(Bundle bundle) {}
+                    public void onConnected(Bundle bundle) {
+                    }
 
                     @Override
                     public void onConnectionSuspended(int i) {
@@ -210,6 +219,27 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
             stub.setBackgroundColor(getResources().getColor(android.R.color.black));
             title.setTextColor(getResources().getColor(android.R.color.white));
         }
+    }
+
+    private void sendMessage(String message) {
+        for (Node node : nodes) {
+            Wearable.MessageApi.sendMessage(googleApiClient, node.getId(), message, null);
+        }
+    }
+
+    private void sendIntent(final String message) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                NodeApi.GetConnectedNodesResult nodes =
+                        Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
+
+                for (Node node : nodes.getNodes()) {
+                    Wearable.MessageApi.sendMessage(
+                            googleApiClient, node.getId(), message, null).await();
+                }
+            }
+        }).start();
     }
 
 }

@@ -21,12 +21,16 @@ import com.google.android.gms.wearable.Wearable;
 public class MainActivity extends ActionBarActivity implements MessageApi.MessageListener {
 
     private static final int REQUEST_CODE_PLAY_SERVICES = 1001;
+    private static final String STOP_APP = "stop_app";
+    private static final String LIGHT_SOUND = "x";
     private static final String HEAVY_SOUND = "y";
 
     protected GoogleApiClient googleApiClient;
     protected SoundPool soundPool;
     protected int soundIdPrimary;
     protected int soundIdSecondary;
+
+    public static boolean isRunning = false;
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -59,6 +63,16 @@ public class MainActivity extends ActionBarActivity implements MessageApi.Messag
         super.onResume();
 
         Wearable.MessageApi.addListener(googleApiClient, this);
+        isRunning = true;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        googleApiClient.disconnect();
+        Wearable.MessageApi.removeListener(googleApiClient, this);
+        isRunning = false;
     }
 
     @Override
@@ -77,15 +91,13 @@ public class MainActivity extends ActionBarActivity implements MessageApi.Messag
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
-        if (messageEvent.getPath().equals(HEAVY_SOUND)) {
-            soundPool.play(soundIdSecondary, 1, 1, 0, 0, 1);
-        } else {
+        if (messageEvent.getPath().equals(LIGHT_SOUND)) {
             soundPool.play(soundIdPrimary, 1, 1, 0, 0, 1);
+        } else if (messageEvent.getPath().equals(HEAVY_SOUND)) {
+            soundPool.play(soundIdSecondary, 1, 1, 0, 0, 1);
+        } else if (messageEvent.getPath().equals(STOP_APP)) {
+            finish();
         }
-    }
-
-    protected int getSound(String name) {
-        return getResources().getIdentifier(name, "raw", getPackageName());
     }
 
     private void setupGoogleAPIClient() {
@@ -118,6 +130,10 @@ public class MainActivity extends ActionBarActivity implements MessageApi.Messag
                 .build();
 
         googleApiClient.connect();
+    }
+
+    protected int getSound(String name) {
+        return getResources().getIdentifier(name, "raw", getPackageName());
     }
 
 }
