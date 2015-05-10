@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">SwingFX</string>
-    <string name="screen_title">SWING!</string>
+    <string name="primary">PRIMARY</string>
+    <string name="secondary">SECONDARY</string>
 
 </resources>

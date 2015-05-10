@@ -11,7 +11,8 @@ import android.os.CountDownTimer;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.wearable.view.WatchViewStub;
-import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +39,7 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
 
     private WatchViewStub stub;
     private TextView title;
+    private Switch soundSwitch;
     private GoogleApiClient googleApiClient;
     private List<Node> nodes;
     protected SensorManager sManager;
@@ -67,11 +69,13 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
             @Override
             public void onLayoutInflated(WatchViewStub watchViewStub) {
                 title = (TextView) stub.findViewById(R.id.title);
-                title.setTextSize(24);
+                soundSwitch = (Switch) stub.findViewById(R.id.sound_switch);
 
-                stub.setOnClickListener(new View.OnClickListener() {
+                soundSwitch.setTextOn("       ");
+                soundSwitch.setTextOff("       ");
+                soundSwitch.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
                     @Override
-                    public void onClick(View v) {
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                         switchMode();
                     }
                 });
@@ -146,7 +150,6 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
             motionStopped = false;
 
             stub.setBackgroundColor(getResources().getColor(R.color.yellow));
-            title.setTextSize(36);
 
             new CountDownTimer(delay, delay) {
                 @Override
@@ -155,13 +158,7 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
                 @Override
                 public void onFinish() {
                     wait = false;
-
-                    if (isHeavy) {
-                        stub.setBackgroundColor(getResources().getColor(android.R.color.white));
-                    } else {
-                        stub.setBackgroundColor(getResources().getColor(android.R.color.black));
-                    }
-                    title.setTextSize(24);
+                    stub.setBackgroundColor(getResources().getColor(android.R.color.black));
                 }
             }.start();
 
@@ -174,7 +171,7 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
             } else {
                 sendMessage(LIGHT_SOUND);
             }
-        } else if (acceleration <= sensitivity * 0.5) {
+        } else if (acceleration <= sensitivity * 0.35) {
             motionStopped = true;
         }
     }
@@ -237,11 +234,9 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
         isHeavy = !isHeavy;
 
         if (isHeavy) {
-            stub.setBackgroundColor(getResources().getColor(android.R.color.white));
-            title.setTextColor(getResources().getColor(android.R.color.black));
+            title.setText(R.string.secondary);
         } else {
-            stub.setBackgroundColor(getResources().getColor(android.R.color.black));
-            title.setTextColor(getResources().getColor(android.R.color.white));
+            title.setText(R.string.primary);
         }
     }
 
