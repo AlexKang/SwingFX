@@ -54,7 +54,6 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
     private boolean motionStopped = true;
 
     private boolean isHeavy = false;
-
     private boolean isRunning = false;
 
     @Override
@@ -171,7 +170,7 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
             } else {
                 sendMessage(LIGHT_SOUND);
             }
-        } else if (acceleration <= sensitivity * 0.35) {
+        } else if (acceleration <= sensitivity * 0.5) {
             motionStopped = true;
         }
     }
@@ -215,8 +214,7 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
                 })
                 .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
                     @Override
-                    public void onConnected(Bundle bundle) {
-                    }
+                    public void onConnected(Bundle bundle) {}
 
                     @Override
                     public void onConnectionSuspended(int i) {
