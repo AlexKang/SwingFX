@@ -49,8 +49,11 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
     private float sensitivity;
     private int delay;
     private boolean wait = false;
+    private boolean motionStopped = true;
 
     private boolean isHeavy = false;
+
+    private boolean isRunning = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +105,22 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
         Wearable.MessageApi.addListener(googleApiClient, this);
 
         sendIntent(START_APP);
+
+        isRunning = true;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (isRunning) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    sendMessage("");
+                }
+            }
+        }).start();
     }
 
     @Override
@@ -110,6 +129,8 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
 
         sManager.unregisterListener(this);
         sendMessage(STOP_APP);
+
+        isRunning = false;
     }
 
     @Override
@@ -120,8 +141,9 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
 
         double acceleration = Math.sqrt(x*x + y*y + z*z);
 
-        if (acceleration > sensitivity && !wait) {
+        if (acceleration > sensitivity && !wait && motionStopped) {
             wait = true;
+            motionStopped = false;
 
             stub.setBackgroundColor(getResources().getColor(R.color.yellow));
             title.setTextSize(36);
@@ -152,6 +174,8 @@ public class MainActivity extends Activity implements SensorEventListener, Messa
             } else {
                 sendMessage(LIGHT_SOUND);
             }
+        } else if (acceleration <= sensitivity * 0.5) {
+            motionStopped = true;
         }
     }
 

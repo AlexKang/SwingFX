@@ -7,10 +7,4 @@
         <item name="android:elevation">2dp</item>
     </style>
 
-    <style name="TextAppearance" parent="TextAppearance">
-        <item name="android:color">@color/charcoal</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textSize">20sp</item>
-    </style>
-
 </resources>

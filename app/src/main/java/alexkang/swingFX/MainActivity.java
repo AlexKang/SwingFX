@@ -1,9 +1,12 @@
 package alexkang.swingFX;
 
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
@@ -33,12 +36,13 @@ public class MainActivity extends ActionBarActivity implements MessageApi.Messag
     public static boolean isRunning = false;
 
     @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
+    @SuppressWarnings("deprecation")
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitleTextAppearance(this, R.style.TextAppearance);
         setSupportActionBar(toolbar);
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -48,12 +52,24 @@ public class MainActivity extends ActionBarActivity implements MessageApi.Messag
                 .commit();
 
         setupGoogleAPIClient();
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        // We use the deprecated SoundPool constructor because the new method of doing so is not
-        // available on 4.4 and lower.
         String primarySound = sharedPrefs.getString("primary_sound", "whoosh");
         String secondarySound = sharedPrefs.getString("secondary_sound", "explosion");
-        soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_GAME)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build();
+            soundPool = new SoundPool.Builder()
+                    .setAudioAttributes(audioAttributes)
+                    .setMaxStreams(1)
+                    .build();
+        } else {
+            soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+        }
+
         soundIdPrimary = soundPool.load(this, getSound(primarySound), 1);
         soundIdSecondary = soundPool.load(this, getSound(secondarySound), 1);
     }
